@@ -14,7 +14,6 @@
         --text: #f5f5f5;
         --sub: #a8a8ad;
         --border: #303036;
-        --danger: #e8b85a;
     }
     * { box-sizing: border-box; }
     body {
@@ -226,15 +225,15 @@
         <div class="section-title">PRICE SETTING</div>
         <div class="input-group">
             <label for="chargePrice">チャージ単価</label>
-            <input type="number" id="chargePrice" placeholder="0" oninput="calculate()">
+            <input type="number" id="chargePrice" value="1000" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="singlePrice">単品単価</label>
-            <input type="number" id="singlePrice" placeholder="0" oninput="calculate()">
+            <input type="number" id="singlePrice" value="800" oninput="calculate()">
         </div>
         <div class="input-group">
-            <label for="shotPrice">ショット単価</label>
-            <input type="number" id="shotPrice" placeholder="0" oninput="calculate()">
+            <label for="shotPrice">ショット(テキーラ)単価</label>
+            <input type="number" id="shotPrice" value="1000" oninput="calculate()">
         </div>
     </div>
 
