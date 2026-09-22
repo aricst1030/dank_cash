@@ -24,7 +24,7 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
     }
     .container { width: 100%; max-width: 520px; margin: auto; }
-    .header { text-align: center; margin: 10px 0 28px; }
+    .header { text-align: center; margin: 10px 0 20px; }
     .brand {
         font-family: Georgia, "Times New Roman", serif;
         font-size: 2.2rem;
@@ -39,6 +39,54 @@
         color: var(--sub);
     }
     .line { width: 55px; height: 2px; background: var(--gold); margin: 15px auto 0; }
+
+    /* タブ切り替えエリア */
+    .tabs-container {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+    .tab-item {
+        background: #1a1a1f;
+        border: 1px solid var(--border);
+        color: var(--sub);
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+    .tab-item.active {
+        background: var(--gold);
+        color: #111;
+        border-color: var(--gold);
+    }
+    .tab-close {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.2);
+    }
+    .tab-item.active .tab-close { background: rgba(0,0,0,0.15); }
+    .tab-add-btn {
+        background: transparent;
+        border: 1px dashed var(--gold);
+        color: var(--gold);
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .tab-add-btn:hover { background: rgba(212,175,90,0.1); }
+
     .card {
         background: rgba(21, 21, 24, 0.95);
         border: 1px solid var(--border);
@@ -184,6 +232,43 @@
         padding: 18px;
         margin-top: 20px;
     }
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .history-btn-group {
+        display: flex;
+        gap: 6px;
+    }
+    .history-sub-btn {
+        background: transparent;
+        border: 1px solid var(--gold);
+        color: var(--gold-light);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .history-sub-btn:hover {
+        background: rgba(212,175,90,0.15);
+    }
+    .history-clear-all-btn {
+        background: transparent;
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .history-clear-all-btn:hover {
+        background: #ff6b6b;
+        color: white;
+    }
     .history-list {
         max-height: 200px;
         overflow-y: auto;
@@ -226,14 +311,6 @@
         letter-spacing: 0.12em;
         color: #66666c;
     }
-
-    @media print {
-        body { background: white; color: black; padding: 0; }
-        .card, .result-card, .history-card { background: white; border: 1px solid #ccc; box-shadow: none; color: black; }
-        input, select { background: white; color: black; border: 1px solid #ccc; }
-        .btn-container, .history-card { display: none; }
-        .brand, .section-title, .total-amount, .split-row { color: #000 !important; }
-    }
 </style>
 </head>
 <body>
@@ -245,11 +322,16 @@
         <div class="line"></div>
     </header>
 
+    <!-- 会計タブ切り替えエリア -->
+    <div class="tabs-container" id="tabsContainer">
+        <!-- 動的にタブが生成されます -->
+    </div>
+
     <div class="card">
         <div class="section-title">CUSTOMER</div>
         <div class="input-group">
             <label for="customerName">お客様名 <span style="color:var(--gold); font-size:0.8rem;">(必須)</span></label>
-            <input type="text" id="customerName" placeholder="お名前を入力" oninput="calculate()">
+            <input type="text" id="customerName" placeholder="お名前を入力" oninput="updateCurrentData(); calculate();">
         </div>
     </div>
 
@@ -257,15 +339,15 @@
         <div class="section-title">PRICE SETTING</div>
         <div class="input-group">
             <label for="chargePrice">チャージ単価</label>
-            <input type="number" id="chargePrice" value="1000" oninput="calculate()">
+            <input type="number" id="chargePrice" value="1000" oninput="updateCurrentData(); calculate();">
         </div>
         <div class="input-group">
             <label for="singlePrice">単品単価</label>
-            <input type="number" id="singlePrice" value="800" oninput="calculate()">
+            <input type="number" id="singlePrice" value="800" oninput="updateCurrentData(); calculate();">
         </div>
         <div class="input-group">
             <label for="shotPrice">ショット単価</label>
-            <input type="number" id="shotPrice" value="1000" oninput="calculate()">
+            <input type="number" id="shotPrice" value="1000" oninput="updateCurrentData(); calculate();">
         </div>
     </div>
 
@@ -273,15 +355,15 @@
         <div class="section-title">ORDER</div>
         <div class="input-group">
             <label for="customers">人数</label>
-            <input type="number" id="customers" min="0" placeholder="0" oninput="calculate()">
+            <input type="number" id="customers" min="0" placeholder="0" oninput="updateCurrentData(); calculate();">
         </div>
         <div class="input-group">
             <label for="singleCount">単品 杯数</label>
-            <input type="number" id="singleCount" min="0" placeholder="0" oninput="calculate()">
+            <input type="number" id="singleCount" min="0" placeholder="0" oninput="updateCurrentData(); calculate();">
         </div>
         <div class="input-group">
             <label for="shotCount">ショット 杯数</label>
-            <input type="number" id="shotCount" min="0" placeholder="0" oninput="calculate()">
+            <input type="number" id="shotCount" min="0" placeholder="0" oninput="updateCurrentData(); calculate();">
         </div>
 
         <div class="section-title" style="margin-top: 24px; font-size: 0.85rem;">BOTTLE ORDERS</div>
@@ -292,13 +374,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice1" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice1" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount1" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount1" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -320,13 +402,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice2" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice2" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount2" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount2" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -348,13 +430,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice3" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice3" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount3" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount3" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -376,13 +458,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice4" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice4" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount4" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount4" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -404,13 +486,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice5" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice5" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount5" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount5" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -432,13 +514,13 @@
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
-                    <select id="bottlePrice6" class="bottle-price" onchange="calculate()">
+                    <select id="bottlePrice6" class="bottle-price" onchange="updateCurrentData(); calculate();">
                         <option value="0">選択なし</option>
                     </select>
                 </div>
                 <div>
                     <label>本数</label>
-                    <select id="bottleCount6" class="bottle-count" onchange="calculate()">
+                    <select id="bottleCount6" class="bottle-count" onchange="updateCurrentData(); calculate();">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -480,12 +562,18 @@
     </div>
 
     <div class="btn-container">
-        <button class="btn-action btn-save" onclick="recordAndPrint()">印刷 & 自動保存</button>
+        <button class="btn-action btn-save" onclick="saveOnly()">売上を保存してタブを閉じる</button>
     </div>
 
     <div class="history-card">
-        <div class="section-title" style="margin-bottom: 10px; font-size: 0.85rem;">売上履歴 (48時間で自動削除)</div>
-        <div class="history-list" id="historyList">
+        <div class="history-header">
+            <div class="section-title" style="margin-bottom: 0; font-size: 0.85rem;">売上履歴 (48時間で自動削除)</div>
+            <div class="history-btn-group">
+                <button class="history-sub-btn" onclick="showTotalSum()">売上合計</button>
+                <button class="history-clear-all-btn" onclick="clearAllHistory()">すべて削除</button>
+            </div>
+        </div>
+        <div class="history-list" id="historyList" style="margin-top: 10px;">
             <div style="text-align: center; color: #555;">履歴はまだありません</div>
         </div>
     </div>
@@ -497,6 +585,9 @@
     let currentTotal = 0;
     const EXPIRATION_HOURS = 48;
 
+    let sessions = [];
+    let activeSessionId = null;
+
     window.onload = function () {
         const priceSelects = document.querySelectorAll(".bottle-price");
         priceSelects.forEach(select => {
@@ -507,9 +598,143 @@
                 select.appendChild(option);
             }
         });
+
+        let savedSessions = localStorage.getItem("bar_dank_sessions");
+        if (savedSessions) {
+            try {
+                sessions = JSON.parse(savedSessions);
+            } catch(e) { sessions = []; }
+        }
+        
+        if (!sessions || sessions.length === 0) {
+            addNewSession();
+        } else {
+            activeSessionId = sessions[0].id;
+        }
+
+        renderTabs();
+        loadFormData();
         loadHistory();
         calculate();
     };
+
+    function createEmptySessionData() {
+        return {
+            id: 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            customerName: "",
+            chargePrice: 1000,
+            singlePrice: 800,
+            shotPrice: 1000,
+            customers: "",
+            singleCount: "",
+            shotCount: "",
+            bottles: [
+                {price: 0, count: 0},
+                {price: 0, count: 0},
+                {price: 0, count: 0},
+                {price: 0, count: 0},
+                {price: 0, count: 0},
+                {price: 0, count: 0}
+            ]
+        };
+    }
+
+    function addNewSession() {
+        const newSess = createEmptySessionData();
+        sessions.push(newSess);
+        activeSessionId = newSess.id;
+        saveSessionsStorage();
+        renderTabs();
+        loadFormData();
+        calculate();
+    }
+
+    function switchSession(id) {
+        updateCurrentData();
+        activeSessionId = id;
+        saveSessionsStorage();
+        renderTabs();
+        loadFormData();
+        calculate();
+    }
+
+    function closeSession(id, event) {
+        event.stopPropagation();
+        if (sessions.length <= 1) {
+            alert("最後のタブは削除できません。");
+            return;
+        }
+        if (!confirm("この会計画面を閉じますか？（入力中の未保存データは消えます）")) {
+            return;
+        }
+        
+        sessions = sessions.filter(s => s.id !== id);
+        if (activeSessionId === id) {
+            activeSessionId = sessions[0].id;
+        }
+        saveSessionsStorage();
+        renderTabs();
+        loadFormData();
+        calculate();
+    }
+
+    function saveSessionsStorage() {
+        localStorage.setItem("bar_dank_sessions", JSON.stringify(sessions));
+    }
+
+    function updateCurrentData() {
+        const sess = sessions.find(s => s.id === activeSessionId);
+        if (!sess) return;
+
+        sess.customerName = document.getElementById("customerName").value;
+        sess.chargePrice = document.getElementById("chargePrice").value;
+        sess.singlePrice = document.getElementById("singlePrice").value;
+        sess.shotPrice = document.getElementById("shotPrice").value;
+        sess.customers = document.getElementById("customers").value;
+        sess.singleCount = document.getElementById("singleCount").value;
+        sess.shotCount = document.getElementById("shotCount").value;
+
+        for (let i = 1; i <= 6; i++) {
+            sess.bottles[i-1].price = document.getElementById("bottlePrice" + i).value;
+            sess.bottles[i-1].count = document.getElementById("bottleCount" + i).value;
+        }
+        saveSessionsStorage();
+    }
+
+    function loadFormData() {
+        const sess = sessions.find(s => s.id === activeSessionId);
+        if (!sess) return;
+
+        document.getElementById("customerName").value = sess.customerName || "";
+        document.getElementById("chargePrice").value = sess.chargePrice ?? 1000;
+        document.getElementById("singlePrice").value = sess.singlePrice ?? 800;
+        document.getElementById("shotPrice").value = sess.shotPrice ?? 1000;
+        document.getElementById("customers").value = sess.customers || "";
+        document.getElementById("singleCount").value = sess.singleCount || "";
+        document.getElementById("shotCount").value = sess.shotCount || "";
+
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById("bottlePrice" + i).value = sess.bottles[i-1].price || 0;
+            document.getElementById("bottleCount" + i).value = sess.bottles[i-1].count || 0;
+        }
+    }
+
+    function renderTabs() {
+        const container = document.getElementById("tabsContainer");
+        let html = "";
+        sessions.forEach((sess, idx) => {
+            const isActive = sess.id === activeSessionId;
+            let label = sess.customerName ? `${sess.customerName}様` : `新規お客様 ${idx + 1}`;
+            html += `
+                <div class="tab-item ${isActive ? 'active' : ''}" onclick="switchSession('${sess.id}')">
+                    <span>${label}</span>
+                    <span class="tab-close" onclick="closeSession('${sess.id}', event)">✕</span>
+                </div>
+            `;
+        });
+        html += `<button class="tab-add-btn" onclick="addNewSession()">＋ 追加</button>`;
+        container.innerHTML = html;
+    }
 
     function calculate() {
         const customerName = document.getElementById("customerName").value.trim();
@@ -574,9 +799,12 @@
         } else {
             splitRow.style.display = "none";
         }
+
+        renderTabs();
     }
 
-    function recordAndPrint() {
+    function saveOnly() {
+        updateCurrentData();
         const customerName = document.getElementById("customerName").value.trim();
         
         if (!customerName) {
@@ -591,7 +819,20 @@
         }
 
         saveHistory();
-        window.print();
+        alert(customerName + "様のご注文を売上保存しました。");
+
+        if (sessions.length > 1) {
+            const targetId = activeSessionId;
+            sessions = sessions.filter(s => s.id !== targetId);
+            activeSessionId = sessions[0].id;
+        } else {
+            sessions[0] = createEmptySessionData();
+        }
+
+        saveSessionsStorage();
+        renderTabs();
+        loadFormData();
+        calculate();
     }
 
     function saveHistory() {
@@ -608,7 +849,6 @@
         };
 
         let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
-        
         const nowTime = now.getTime();
         history = history.filter(item => (nowTime - item.timestamp) < EXPIRATION_HOURS * 60 * 60 * 1000);
 
@@ -625,6 +865,28 @@
         history = history.filter(item => item.id !== id);
         localStorage.setItem("bar_dank_history", JSON.stringify(history));
         loadHistory();
+    }
+
+    function clearAllHistory() {
+        if (!confirm("すべての売上履歴を削除してもよろしいですか？この操作は元に戻せません。")) {
+            return;
+        }
+        localStorage.removeItem("bar_dank_history");
+        loadHistory();
+    }
+
+    // 時間を無視して履歴にある全売上を合計して表示する関数
+    function showTotalSum() {
+        let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
+        
+        let totalSum = 0;
+        let totalCount = history.length;
+
+        history.forEach(item => {
+            totalSum += item.total;
+        });
+
+        alert(`【売上総合計】\n件数: ${totalCount}件\n合計金額: ¥${totalSum.toLocaleString()}`);
     }
 
     function loadHistory() {
