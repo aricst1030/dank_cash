@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAR DANK | CASHIER</title>
+<style>
+    :root {
+        --bg: #0b0b0d;
+        --card: #151518;
+        --card-light: #1d1d21;
+        --gold: #d4af5a;
+        --gold-light: #f0d58a;
+        --text: #f5f5f5;
+        --sub: #a8a8ad;
+        --border: #303036;
+        --danger: #e8b85a;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 20px 14px 40px;
+        background: radial-gradient(circle at top, #242018 0%, #0b0b0d 38%);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+    }
+    .container { width: 100%; max-width: 520px; margin: auto; }
+    .header { text-align: center; margin: 10px 0 28px; }
+    .brand {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 2.2rem;
+        font-weight: bold;
+        letter-spacing: 0.16em;
+        color: var(--gold-light);
+    }
+    .cashier {
+        margin-top: 5px;
+        font-size: 0.85rem;
+        letter-spacing: 0.45em;
+        color: var(--sub);
+    }
+    .line { width: 55px; height: 2px; background: var(--gold); margin: 15px auto 0; }
+    .card {
+        background: rgba(21, 21, 24, 0.95);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 17px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        letter-spacing: 0.15em;
+        color: var(--gold-light);
+    }
+    .section-title::before {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 20px;
+        background: var(--gold);
+        border-radius: 4px;
+    }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 7px; font-size: 1rem; color: #d8d8dc; }
+    input, select {
+        width: 100%;
+        height: 54px;
+        padding: 8px 14px;
+        border-radius: 11px;
+        border: 1px solid #3a3a40;
+        background: var(--card-light);
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: right;
+        outline: none;
+    }
+    input:focus, select:focus {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 2px rgba(212,175,90,0.15);
+    }
+    select { text-align: left; font-size: 1.05rem; }
+    .result-card {
+        background: linear-gradient(145deg, #1c1b17, #111113);
+        border: 1px solid #4b4027;
+        border-radius: 18px;
+        padding: 22px 20px;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.45);
+    }
+    .result-title {
+        text-align: center;
+        color: var(--gold-light);
+        font-size: 0.85rem;
+        letter-spacing: 0.25em;
+        margin-bottom: 18px;
+    }
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        font-size: 1.05rem;
+        color: #d8d8dc;
+    }
+    .amount { font-weight: 600; color: white; }
+    .total-row {
+        margin-top: 12px;
+        padding-top: 18px;
+        border-top: 1px solid #4a463b;
+    }
+    .total-label { font-size: 1.15rem; font-weight: bold; color: white; }
+    .total-amount {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gold-light);
+    }
+    .footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        color: #66666c;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <div class="brand">BAR DANK</div>
+        <div class="cashier">CASHIER</div>
+        <div class="line"></div>
+    </header>
+
+    <div class="card">
+        <div class="section-title">PRICE SETTING</div>
+        <div class="input-group">
+            <label for="chargePrice">チャージ単価</label>
+            <input type="number" id="chargePrice" value="1000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="singlePrice">単品単価</label>
+            <input type="number" id="singlePrice" value="800" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="shotPrice">ショット単価</label>
+            <input type="number" id="shotPrice" value="1000" oninput="calculate()">
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-title">ORDER</div>
+        <div class="input-group">
+            <label for="customers">人数</label>
+            <input type="number" id="customers" value="1" min="0" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="singleCount">単品 杯数</label>
+            <input type="number" id="singleCount" value="0" min="0" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="shotCount">ショット 杯数</label>
+            <input type="number" id="shotCount" value="0" min="0" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="bottlePrice">ボトル単価</label>
+            <select id="bottlePrice" onchange="calculate()">
+                <option value="0">選択なし</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="bottleCount">ボトル 本数</label>
+            <input type="number" id="bottleCount" value="0" min="0" oninput="calculate()">
+        </div>
+    </div>
+
+    <div class="result-card">
+        <div class="result-title">BILL SUMMARY</div>
+        <div class="result-row">
+            <span>小計</span>
+            <span class="amount" id="subtotal">¥0</span>
+        </div>
+        <div class="result-row">
+            <span>消費税 10%</span>
+            <span class="amount" id="tax">¥0</span>
+        </div>
+        <div class="result-row total-row">
+            <span class="total-label">TOTAL</span>
+            <span class="total-amount" id="total">¥0</span>
+        </div>
+    </div>
+
+    <div class="footer">BAR DANK · CASHIER SYSTEM</div>
+</div>
+
+<script>
+    window.onload = function () {
+        const select = document.getElementById("bottlePrice");
+        for (let price = 10000; price <= 100000; price += 5000) {
+            const option = document.createElement("option");
+            option.value = price;
+            option.textContent = "¥" + price.toLocaleString();
+            select.appendChild(option);
+        }
+        calculate();
+    };
+
+    function calculate() {
+        const chargePrice = parseInt(document.getElementById("chargePrice").value) || 0;
+        const singlePrice = parseInt(document.getElementById("singlePrice").value) || 0;
+        const shotPrice = parseInt(document.getElementById("shotPrice").value) || 0;
+        const customers = parseInt(document.getElementById("customers").value) || 0;
+        const singleCount = parseInt(document.getElementById("singleCount").value) || 0;
+        const shotCount = parseInt(document.getElementById("shotCount").value) || 0;
+        const bottlePrice = parseInt(document.getElementById("bottlePrice").value) || 0;
+        const bottleCount = parseInt(document.getElementById("bottleCount").value) || 0;
+
+        const chargeSub = customers * chargePrice;
+        const singleSub = singleCount * singlePrice;
+        const shotSub = shotCount * shotPrice;
+        const bottleSub = bottleCount * bottlePrice;
+
+        const subtotal = chargeSub + singleSub + shotSub + bottleSub;
+        const tax = Math.round(subtotal * 0.10);
+        const total = subtotal + tax;
+
+        document.getElementById("subtotal").textContent = "¥" + subtotal.toLocaleString();
+        document.getElementById("tax").textContent = "¥" + tax.toLocaleString();
+        document.getElementById("total").textContent = "¥" + total.toLocaleString();
+    }
+</script>
+
+</body>
+</html>
