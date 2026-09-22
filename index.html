@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BAR DANK | CASHIER</title>
+<title>BAR DANK | CASHIER & HISTORY</title>
 <style>
     :root {
         --bg: #0b0b0d;
@@ -80,9 +80,7 @@
         text-align: right;
         outline: none;
     }
-    input[type="text"] {
-        text-align: left;
-    }
+    input[type="text"] { text-align: left; }
     input:focus, select:focus {
         border-color: var(--gold);
         box-shadow: 0 0 0 2px rgba(212,175,90,0.15);
@@ -103,22 +101,10 @@
         margin-bottom: 8px;
         font-weight: bold;
     }
-    .bottle-inputs {
-        display: flex;
-        gap: 10px;
-    }
-    .bottle-inputs > div {
-        flex: 1;
-    }
-    .bottle-inputs label {
-        font-size: 0.8rem;
-        margin-bottom: 4px;
-        color: var(--sub);
-    }
-    .bottle-inputs select {
-        height: 44px;
-        font-size: 0.95rem;
-    }
+    .bottle-inputs { display: flex; gap: 10px; }
+    .bottle-inputs > div { flex: 1; }
+    .bottle-inputs label { font-size: 0.8rem; margin-bottom: 4px; color: var(--sub); }
+    .bottle-inputs select { height: 44px; font-size: 0.95rem; }
 
     .result-card {
         background: linear-gradient(145deg, #1c1b17, #111113);
@@ -170,22 +156,53 @@
         color: var(--gold-light);
         font-weight: bold;
     }
-    .btn-print {
-        width: 100%;
-        height: 54px;
+    .btn-container {
+        display: flex;
+        gap: 10px;
         margin-top: 20px;
+    }
+    .btn-action {
+        flex: 1;
+        height: 54px;
         border-radius: 14px;
         border: none;
-        background: linear-gradient(135deg, var(--gold), #b89742);
-        color: #111;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: bold;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.08em;
         cursor: pointer;
-        box-shadow: 0 6px 20px rgba(212,175,90,0.3);
         transition: opacity 0.2s;
     }
-    .btn-print:hover { opacity: 0.9; }
+    .btn-save {
+        background: linear-gradient(135deg, var(--gold), #b89742);
+        color: #111;
+        box-shadow: 0 6px 20px rgba(212,175,90,0.3);
+    }
+    .btn-excel {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        color: white;
+        box-shadow: 0 6px 20px rgba(46,125,50,0.3);
+    }
+    .btn-action:hover { opacity: 0.9; }
+
+    .history-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        margin-top: 20px;
+    }
+    .history-list {
+        max-height: 180px;
+        overflow-y: auto;
+        font-size: 0.85rem;
+        color: var(--sub);
+    }
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #25252b;
+    }
 
     .footer {
         text-align: center;
@@ -197,9 +214,9 @@
 
     @media print {
         body { background: white; color: black; padding: 0; }
-        .card, .result-card { background: white; border: 1px solid #ccc; box-shadow: none; color: black; }
+        .card, .result-card, .history-card { background: white; border: 1px solid #ccc; box-shadow: none; color: black; }
         input, select { background: white; color: black; border: 1px solid #ccc; }
-        .btn-print { display: none; }
+        .btn-container, .history-card { display: none; }
         .brand, .section-title, .total-amount, .split-row { color: #000 !important; }
     }
 </style>
@@ -209,7 +226,7 @@
 <div class="container">
     <header class="header">
         <div class="brand">BAR DANK</div>
-        <div class="cashier">CASHIER</div>
+        <div class="cashier">CASHIER & HISTORY</div>
         <div class="line"></div>
     </header>
 
@@ -225,14 +242,14 @@
         <div class="section-title">PRICE SETTING</div>
         <div class="input-group">
             <label for="chargePrice">チャージ単価</label>
-            <input type="number" id="chargePrice" value="1000" oninput="calculate()">
+            <input type="number" id="chargePrice" value="800" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="singlePrice">単品単価</label>
             <input type="number" id="singlePrice" value="800" oninput="calculate()">
         </div>
         <div class="input-group">
-            <label for="shotPrice">ショット(テキーラ)単価</label>
+            <label for="shotPrice">ショット単価</label>
             <input type="number" id="shotPrice" value="1000" oninput="calculate()">
         </div>
     </div>
@@ -434,7 +451,7 @@
             <span class="amount" id="subtotal">¥0</span>
         </div>
         <div class="result-row">
-            <span>消費税 10%</span>
+            <span>TAX 10%</span>
             <span class="amount" id="tax">¥0</span>
         </div>
         <div class="result-row total-row">
@@ -447,12 +464,24 @@
         </div>
     </div>
 
-    <button class="btn-print" onclick="window.print()">PDF / 印刷保存</button>
+    <div class="btn-container">
+        <button class="btn-action btn-save" onclick="recordAndPrint()">PDF / 印刷 & 記録</button>
+        <button class="btn-action btn-excel" onclick="exportExcel()">Excel (CSV) 保存</button>
+    </div>
+
+    <div class="history-card">
+        <div class="section-title" style="margin-bottom: 10px; font-size: 0.85rem;">売上履歴 (自動蓄積)</div>
+        <div class="history-list" id="historyList">
+            <div style="text-align: center; color: #555;">履歴はまだありません</div>
+        </div>
+    </div>
 
     <div class="footer">BAR DANK · CASHIER SYSTEM</div>
 </div>
 
 <script>
+    let currentTotal = 0;
+
     window.onload = function () {
         const priceSelects = document.querySelectorAll(".bottle-price");
         priceSelects.forEach(select => {
@@ -463,6 +492,7 @@
                 select.appendChild(option);
             }
         });
+        loadHistory();
         calculate();
     };
 
@@ -475,7 +505,6 @@
         const singleCount = parseInt(document.getElementById("singleCount").value) || 0;
         const shotCount = parseInt(document.getElementById("shotCount").value) || 0;
 
-        // タイトルにお客様名反映
         if (customerName) {
             document.getElementById("summaryTitle").textContent = `BILL SUMMARY - ${customerName}様`;
         } else {
@@ -516,21 +545,82 @@
 
         const subtotal = chargeSub + singleSub + shotSub + bottleSub;
         const tax = Math.round(subtotal * 0.10);
-        const total = subtotal + tax;
+        currentTotal = subtotal + tax;
 
         document.getElementById("subtotal").textContent = "¥" + subtotal.toLocaleString();
         document.getElementById("tax").textContent = "¥" + tax.toLocaleString();
-        document.getElementById("total").textContent = "¥" + total.toLocaleString();
+        document.getElementById("total").textContent = "¥" + currentTotal.toLocaleString();
 
-        // 人数割（割勘金額）の計算
         const splitRow = document.getElementById("splitRow");
-        if (customers > 1 && total > 0) {
-            const splitAmount = Math.round(total / customers);
+        if (customers > 1 && currentTotal > 0) {
+            const splitAmount = Math.round(currentTotal / customers);
             document.getElementById("splitAmount").textContent = "¥" + splitAmount.toLocaleString();
             splitRow.style.display = "flex";
         } else {
             splitRow.style.display = "none";
         }
+    }
+
+    function recordAndPrint() {
+        saveHistory();
+        window.print();
+    }
+
+    function saveHistory() {
+        const customerName = document.getElementById("customerName").value.trim() || "一般のお客様";
+        const now = new Date();
+        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        
+        if (currentTotal <= 0) return;
+
+        const record = {
+            time: timeStr,
+            name: customerName,
+            total: currentTotal
+        };
+
+        let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
+        history.unshift(record); // 最新を先頭に
+        if (history.length > 50) history = history.slice(0, 50); // 最大50件保持
+        localStorage.setItem("bar_dank_history", JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
+        const listEl = document.getElementById("historyList");
+        if (history.length === 0) {
+            listEl.innerHTML = `<div style="text-align: center; color: #555;">履歴はまだありません</div>`;
+            return;
+        }
+        let html = "";
+        history.forEach(item => {
+            html += `<div class="history-item"><span>${item.time} - ${item.name}様</span><span style="color:var(--gold-light)">¥${item.total.toLocaleString()}</span></div>`;
+        });
+        listEl.innerHTML = html;
+    }
+
+    function exportExcel() {
+        const history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
+        if (history.length === 0) {
+            alert("エクスポートする履歴がありません。");
+            return;
+        }
+
+        let csv = "日時,お客様名,合計金額\n";
+        history.forEach(item => {
+            csv += `"${item.time}","${item.name}",${item.total}\n`;
+        });
+
+        // BOM付与でExcelでの文字化け防止
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `bardank_sales_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 </script>
 
