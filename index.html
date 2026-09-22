@@ -81,6 +81,9 @@
         text-align: right;
         outline: none;
     }
+    input[type="text"] {
+        text-align: left;
+    }
     input:focus, select:focus {
         border-color: var(--gold);
         box-shadow: 0 0 0 2px rgba(212,175,90,0.15);
@@ -157,12 +160,48 @@
         font-weight: 800;
         color: var(--gold-light);
     }
+    .split-row {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #4a463b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+        color: var(--gold-light);
+        font-weight: bold;
+    }
+    .btn-print {
+        width: 100%;
+        height: 54px;
+        margin-top: 20px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, var(--gold), #b89742);
+        color: #111;
+        font-size: 1.1rem;
+        font-weight: bold;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(212,175,90,0.3);
+        transition: opacity 0.2s;
+    }
+    .btn-print:hover { opacity: 0.9; }
+
     .footer {
         text-align: center;
         margin-top: 22px;
         font-size: 0.75rem;
         letter-spacing: 0.12em;
         color: #66666c;
+    }
+
+    @media print {
+        body { background: white; color: black; padding: 0; }
+        .card, .result-card { background: white; border: 1px solid #ccc; box-shadow: none; color: black; }
+        input, select { background: white; color: black; border: 1px solid #ccc; }
+        .btn-print { display: none; }
+        .brand, .section-title, .total-amount, .split-row { color: #000 !important; }
     }
 </style>
 </head>
@@ -176,18 +215,26 @@
     </header>
 
     <div class="card">
+        <div class="section-title">CUSTOMER</div>
+        <div class="input-group">
+            <label for="customerName">お客様名</label>
+            <input type="text" id="customerName" placeholder="お名前を入力" oninput="calculate()">
+        </div>
+    </div>
+
+    <div class="card">
         <div class="section-title">PRICE SETTING</div>
         <div class="input-group">
             <label for="chargePrice">チャージ単価</label>
-            <input type="number" id="chargePrice" value="1000" oninput="calculate()">
+            <input type="number" id="chargePrice" placeholder="0" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="singlePrice">単品単価</label>
-            <input type="number" id="singlePrice" value="800" oninput="calculate()">
+            <input type="number" id="singlePrice" placeholder="0" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="shotPrice">ショット単価</label>
-            <input type="number" id="shotPrice" value="1000" oninput="calculate()">
+            <input type="number" id="shotPrice" placeholder="0" oninput="calculate()">
         </div>
     </div>
 
@@ -195,22 +242,22 @@
         <div class="section-title">ORDER</div>
         <div class="input-group">
             <label for="customers">人数</label>
-            <input type="number" id="customers" value="1" min="0" oninput="calculate()">
+            <input type="number" id="customers" min="0" placeholder="0" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="singleCount">単品 杯数</label>
-            <input type="number" id="singleCount" value="0" min="0" oninput="calculate()">
+            <input type="number" id="singleCount" min="0" placeholder="0" oninput="calculate()">
         </div>
         <div class="input-group">
             <label for="shotCount">ショット 杯数</label>
-            <input type="number" id="shotCount" value="0" min="0" oninput="calculate()">
+            <input type="number" id="shotCount" min="0" placeholder="0" oninput="calculate()">
         </div>
 
         <div class="section-title" style="margin-top: 24px; font-size: 0.85rem;">BOTTLE ORDERS</div>
 
-        <!-- ボトル1〜6 -->
+        <!-- ボトル1〜6 (0なし) -->
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 01</div>
+            <div class="bottle-row-title">BOTTLE 1</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -238,7 +285,7 @@
         </div>
 
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 02</div>
+            <div class="bottle-row-title">BOTTLE 2</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -266,7 +313,7 @@
         </div>
 
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 03</div>
+            <div class="bottle-row-title">BOTTLE 3</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -294,7 +341,7 @@
         </div>
 
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 04</div>
+            <div class="bottle-row-title">BOTTLE 4</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -322,7 +369,7 @@
         </div>
 
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 05</div>
+            <div class="bottle-row-title">BOTTLE 5</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -350,7 +397,7 @@
         </div>
 
         <div class="bottle-row">
-            <div class="bottle-row-title">BOTTLE 06</div>
+            <div class="bottle-row-title">BOTTLE 6</div>
             <div class="bottle-inputs">
                 <div>
                     <label>単価</label>
@@ -379,7 +426,7 @@
     </div>
 
     <div class="result-card">
-        <div class="result-title">BILL SUMMARY & BREAKDOWN</div>
+        <div class="result-title" id="summaryTitle">BILL SUMMARY & BREAKDOWN</div>
         <div class="breakdown-section" id="breakdownContainer">
             <!-- 動的に内訳を表示 -->
         </div>
@@ -395,7 +442,13 @@
             <span class="total-label">TOTAL</span>
             <span class="total-amount" id="total">¥0</span>
         </div>
+        <div class="split-row" id="splitRow" style="display: none;">
+            <span>お一人様あたり (割勘)</span>
+            <span id="splitAmount">¥0</span>
+        </div>
     </div>
+
+    <button class="btn-print" onclick="window.print()">PDF / 印刷保存</button>
 
     <div class="footer">BAR DANK · CASHIER SYSTEM</div>
 </div>
@@ -407,7 +460,7 @@
             for (let price = 10000; price <= 100000; price += 5000) {
                 const option = document.createElement("option");
                 option.value = price;
-                option.textContent = price.toLocaleString(); // 円を削除
+                option.textContent = price.toLocaleString();
                 select.appendChild(option);
             }
         });
@@ -415,12 +468,20 @@
     };
 
     function calculate() {
+        const customerName = document.getElementById("customerName").value.trim();
         const chargePrice = parseInt(document.getElementById("chargePrice").value) || 0;
         const singlePrice = parseInt(document.getElementById("singlePrice").value) || 0;
         const shotPrice = parseInt(document.getElementById("shotPrice").value) || 0;
         const customers = parseInt(document.getElementById("customers").value) || 0;
         const singleCount = parseInt(document.getElementById("singleCount").value) || 0;
         const shotCount = parseInt(document.getElementById("shotCount").value) || 0;
+
+        // タイトルにお客様名反映
+        if (customerName) {
+            document.getElementById("summaryTitle").textContent = `BILL SUMMARY - ${customerName}様`;
+        } else {
+            document.getElementById("summaryTitle").textContent = "BILL SUMMARY & BREAKDOWN";
+        }
 
         const chargeSub = customers * chargePrice;
         const singleSub = singleCount * singlePrice;
@@ -444,7 +505,7 @@
             if (bPrice > 0 && bCount > 0) {
                 const bTotal = bPrice * bCount;
                 bottleSub += bTotal;
-                breakdownHTML += `<div class="result-row"><span>ボトル0${i} (¥${bPrice.toLocaleString()} × ${bCount})</span><span class="amount">¥${bTotal.toLocaleString()}</span></div>`;
+                breakdownHTML += `<div class="result-row"><span>ボトル ${i} (¥${bPrice.toLocaleString()} × ${bCount})</span><span class="amount">¥${bTotal.toLocaleString()}</span></div>`;
             }
         }
 
@@ -461,6 +522,16 @@
         document.getElementById("subtotal").textContent = "¥" + subtotal.toLocaleString();
         document.getElementById("tax").textContent = "¥" + tax.toLocaleString();
         document.getElementById("total").textContent = "¥" + total.toLocaleString();
+
+        // 人数割（割勘金額）の計算
+        const splitRow = document.getElementById("splitRow");
+        if (customers > 1 && total > 0) {
+            const splitAmount = Math.round(total / customers);
+            document.getElementById("splitAmount").textContent = "¥" + splitAmount.toLocaleString();
+            splitRow.style.display = "flex";
+        } else {
+            splitRow.style.display = "none";
+        }
     }
 </script>
 
