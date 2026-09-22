@@ -185,7 +185,7 @@
         margin-top: 20px;
     }
     .history-list {
-        max-height: 180px;
+        max-height: 200px;
         overflow-y: auto;
         font-size: 0.85rem;
         color: var(--sub);
@@ -193,8 +193,30 @@
     .history-item {
         display: flex;
         justify-content: space-between;
-        padding: 6px 0;
+        align-items: center;
+        padding: 8px 0;
         border-bottom: 1px solid #25252b;
+    }
+    .history-info {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        overflow: hidden;
+    }
+    .history-delete-btn {
+        background: #2a2a32;
+        border: 1px solid #44444f;
+        color: #ff6b6b;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    .history-delete-btn:hover {
+        background: #3a2a2a;
+        border-color: #ff6b6b;
     }
 
     .footer {
@@ -226,7 +248,7 @@
     <div class="card">
         <div class="section-title">CUSTOMER</div>
         <div class="input-group">
-            <label for="customerName">お客様名</label>
+            <label for="customerName">お客様名 <span style="color:var(--gold); font-size:0.8rem;">(必須)</span></label>
             <input type="text" id="customerName" placeholder="お名前を入力" oninput="calculate()">
         </div>
     </div>
@@ -555,21 +577,31 @@
     }
 
     function recordAndPrint() {
+        const customerName = document.getElementById("customerName").value.trim();
+        
+        if (!customerName) {
+            alert("お客様名を入力してください。（名前がないと記録できません）");
+            document.getElementById("customerName").focus();
+            return;
+        }
+
         if (currentTotal <= 0) {
             alert("合計金額が0円です。");
             return;
         }
+
         saveHistory();
         window.print();
     }
 
     function saveHistory() {
-        const customerName = document.getElementById("customerName").value.trim() || "一般のお客様";
+        const customerName = document.getElementById("customerName").value.trim();
         const now = new Date();
         const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         
         const record = {
-            timestamp: now.getTime(), // 48時間判定用のミリ秒
+            id: now.getTime() + "_" + Math.random().toString(36).substring(2, 7),
+            timestamp: now.getTime(),
             time: timeStr,
             name: customerName,
             total: currentTotal
@@ -577,11 +609,20 @@
 
         let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
         
-        // 48時間以内のデータのみ残す
         const nowTime = now.getTime();
         history = history.filter(item => (nowTime - item.timestamp) < EXPIRATION_HOURS * 60 * 60 * 1000);
 
-        history.unshift(record); // 最新を先頭に
+        history.unshift(record);
+        localStorage.setItem("bar_dank_history", JSON.stringify(history));
+        loadHistory();
+    }
+
+    function deleteHistoryItem(id) {
+        if (!confirm("この履歴を削除してもよろしいですか？")) {
+            return;
+        }
+        let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
+        history = history.filter(item => item.id !== id);
         localStorage.setItem("bar_dank_history", JSON.stringify(history));
         loadHistory();
     }
@@ -590,7 +631,6 @@
         let history = JSON.parse(localStorage.getItem("bar_dank_history") || "[]");
         const listEl = document.getElementById("historyList");
         
-        // 読み込み時にも48時間経過したものを除外・クリーンアップ
         const nowTime = new Date().getTime();
         const validHistory = history.filter(item => (nowTime - item.timestamp) < EXPIRATION_HOURS * 60 * 60 * 1000);
         
@@ -606,7 +646,16 @@
 
         let html = "";
         history.forEach(item => {
-            html += `<div class="history-item"><span>${item.time} - ${item.name}様</span><span style="color:var(--gold-light)">¥${item.total.toLocaleString()}</span></div>`;
+            const itemId = item.id || item.timestamp;
+            html += `
+                <div class="history-item">
+                    <div class="history-info">
+                        <span>${item.time} - ${item.name}様</span>
+                        <span style="color:var(--gold-light)">¥${item.total.toLocaleString()}</span>
+                    </div>
+                    <button class="history-delete-btn" onclick="deleteHistoryItem('${itemId}')">削除</button>
+                </div>
+            `;
         });
         listEl.innerHTML = html;
     }
